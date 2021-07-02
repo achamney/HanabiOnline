@@ -1,0 +1,30 @@
+<html>
+<head>
+    <link type="text/css" href="style.css" rel="stylesheet" />
+    <title>Hanabi</title>
+</head>
+<body style="padding:0;margin:0">
+    <div id="main"></div>
+    <div id="playerButtons">
+        <button class="btn btn-primary" onclick="playCard(this)">Play</button>
+        <button class="btn btn-primary" onclick="discardCard(this)">Discard</button>
+    </div>
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modaltext">
+
+            </div>
+        </div>
+
+    </div>
+</body>
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+<script src="markgen.js"></script>
+<script src="game.js"></script>
+</html>

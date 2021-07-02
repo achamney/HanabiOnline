@@ -1,0 +1,92 @@
+﻿.block {
+    position: absolute;
+}
+
+.card {
+    border: 3px solid black;
+    border-radius: 10px;
+    transform-origin: center;
+    width: 60px;
+    height: 100px;
+    background-color: #EEE;
+    font-size:30px;
+    padding: 5px;
+}
+.centerboard {
+    border: 1px solid black;
+}
+.playerboard {
+    border: 1px solid black;
+}
+#playerButtons{
+    position: relative;
+    top:510px;
+    left:540px
+}
+.upnumber{
+    transform: rotate(180deg);
+    position: absolute;
+    bottom:3px;
+    right:3px;
+}
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+
+/* Modal Content */
+.modal-content {
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: 80%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+    top: 100px;
+}
+
+/* Add Animation */
+@keyframes animatetop {
+    from {
+        top: -300px;
+        opacity: 0
+    }
+
+    to {
+        top: 100px;
+        opacity: 1
+    }
+}
+
+/* The Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+#modaltext{
+    padding: 20px;
+    font-size: 20px;
+}
