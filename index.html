@@ -4,7 +4,12 @@
     <title>Hanabi</title>
 </head>
 <body style="padding:0;margin:0">
-    <div id="main"></div>
+    <div id="main">
+        Name: <input id="newName" />
+        <button class="btn btn-primary" onclick="addName()">Add</button>
+        <button class="btn btn-primary" onclick="makeGameState()">Start Game</button>
+        <br>
+    </div>
     <div id="playerButtons">
         <button class="btn btn-primary" onclick="playCard(this)">Play</button>
         <button class="btn btn-primary" onclick="discardCard(this)">Discard</button>
@@ -18,12 +23,26 @@
             <div id="modaltext">
 
             </div>
+            <button class="btn btn-default" onclick="clueColor('red')">Red</button>
+            <button class="btn btn-default" onclick="clueColor('orange')">Orange</button>
+            <button class="btn btn-default" onclick="clueColor('green')">Green</button>
+            <button class="btn btn-default" onclick="clueColor('blue')">Blue</button>
+            <button class="btn btn-default" onclick="clueColor('purple')">Purple</button>
+
+            <button class="btn btn-primary floatRight" onclick="sendClue()">Send Clue</button>
+
+            <hr/>
+            <button class="btn btn-default" onclick="clueNumber(1)">1</button>
+            <button class="btn btn-default" onclick="clueNumber(2)">2</button>
+            <button class="btn btn-default" onclick="clueNumber(3)">3</button>
+            <button class="btn btn-default" onclick="clueNumber(4)">4</button>
+            <button class="btn btn-default" onclick="clueNumber(5)">5</button>
         </div>
 
     </div>
 </body>
 
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="jquery-3.4.1.min.js"></script>
 
 <script src="markgen.js"></script>
 <script src="game.js"></script>

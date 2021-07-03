@@ -4,12 +4,22 @@ var gamestate = {
     center: {},
     discards: [],
     players: [],
+    log: [],
+    curPlayerName: "",
     time: 8,
     lives: 3
-}, curPlayer;
+}, myPlayer;
 window.onload = function () {
+}
+function addName() {
+    var newName = get('newName');
+    gamestate.players.push({ cards: [], name: newName.value });
+    get("main").innerHTML += `${newName.value}<br>`;
+    newName.value = "";
+}
+function makeGameState() {
     var numfreq = [3, 2, 2, 2, 1];
-    var colorInd = ["red", "#fa3", "green", "blue", "purple"];
+    var colorInd = ["red", "orange", "green", "blue", "purple"];
     for (var i = 0; i < 5; i++) {
         for (var j = 0; j < 5; j++) {
             for (var k = 0; k < numfreq[i]; k++) {
@@ -17,30 +27,28 @@ window.onload = function () {
             }
         }
     }
-    gamestate.deck.sort((a, b) => { return b.num - a.num/*Math.random() * 3 - 1*/; });
-    gamestate.players.push({ cards: [], name: "Austin" });
-    curPlayer = clone(gamestate.players[0]);
-    gamestate.players.push({ cards: [], name: "Lisa" });
-    gamestate.players.push({ cards: [], name: "Kai" });
-    gamestate.players.push({ cards: [], name: "Vesa" });
+    gamestate.deck.sort((a, b) => { return Math.random() * 3 - 1; });
+    myPlayer = clone(gamestate.players[0]);
+    gamestate.curPlayerName = myPlayer.name;
     for (var i = 0; i < 4; i++) {
         for (var player of gamestate.players) {
             var card = gamestate.deck.pop();
             player.cards.push(card);
         }
     }
+
     drawGameState();
 }
 function drawGameState() {
     var main = get("main");
     main.innerHTML = "";
-    make("span" ,main, "hud").innerHTML = `Time: ${gamestate.time} Lives: ${gamestate.lives}`;
-    var center = makesq("div", main, "block centerboard", "20%", "20%", "60%", "60%");
+    make("span", main, "hud").innerHTML = `Time: ${gamestate.time} Lives: ${gamestate.lives}`;
+    var center = makesq("div", main, "block centerboard", "160px", "120px", "590px", "340px");
     for (var i = 0; i < gamestate.deck.length; i++) {
         var card = gamestate.deck[i];
         makeCard(card, center, i * 0.5 + 450, (i * -1) + 120, false);
     }
-    curPlayer.cardDoms = [];
+    myPlayer.cardDoms = [];
     var translatePos = [{ x: "250px", y: "500px", rot: 0 },
     { x: "-100px", y: "200px", rot: "90deg" },
     { x: "250px", y: 0, rot: "180deg" },
@@ -48,16 +56,22 @@ function drawGameState() {
     for (var i = 0; i < gamestate.players.length; i++) {
         var player = gamestate.players[i];
         var playerBoard = makesq("div", main, "block playerboard", 0, 0, "400px", "120px");
+        if (player.name == gamestate.curPlayerName) {
+            playerBoard.style["background-color"] = "#FFA";
+        }
+        make("span", playerBoard, "playerName").innerHTML = player.name;
         playerBoard.style.transform = `translate(${translatePos[i].x},${translatePos[i].y}) rotate(${translatePos[i].rot})`
 
         for (var j = 0; j < player.cards.length; j++) {
             var pcard = player.cards[j];
-            var pcarddom = makeCard(pcard, playerBoard, j * 70, 0, true/* player.name != curPlayer.name*/);
+            var pcarddom = makeCard(pcard, playerBoard, j * 70, 0, player.name != myPlayer.name);
             pcarddom.card = pcard;
-            //if (player.name == curPlayer.name) {
-            curPlayer.cardDoms.push(pcarddom);
-            pcarddom.onclick = clickPlayerCard;
-            //}
+            if (player.name == myPlayer.name) {
+                myPlayer.cardDoms.push(pcarddom);
+                pcarddom.onclick = clickPlayerCard;
+            } else {
+                pcarddom.onclick = clickTeamCard.bind(player);
+            }
         }
     }
     var centerCount = 0;
@@ -75,39 +89,52 @@ function drawGameState() {
         var card = gamestate.discards[i];
         makeCard(card, main, 890, 150 + i * 25, true);
     }
+    var logBody = makesq("div", main, "block playerboard", "1100px", "100px", "150px", "440px");
+    for (var log of gamestate.log) {
+        logBody.innerHTML += `${log}<br>`;
+    }
 }
 function clickPlayerCard() {
-    for (var card of curPlayer.cardDoms) {
+    for (var card of myPlayer.cardDoms) {
         card.selected = false;
         card.style.outline = "none";
     }
     this.selected = true;
     this.style.outline = "4px solid blue";
 }
+function clickTeamCard() {
+    var modal = get("myModal");
+    modal.style.display = "block";
+    window.clueData = deepClone(this);
+    drawClueCards();
+}
 function playCard() {
-    var carddom = curPlayer.cardDoms.filter(a => a.selected)[0];
+    var carddom = myPlayer.cardDoms.filter(a => a.selected)[0];
     if (!carddom) {
         return;
     }
-    curPlayer.cards.splice(curPlayer.cards.indexOf(carddom.card), 1);
+    myPlayer.cards.splice(myPlayer.cards.indexOf(carddom.card), 1);
     gamestate.center[carddom.card.color] = gamestate.center[carddom.card.color] || [];
     var centerGroup = gamestate.center[carddom.card.color];
     if ((centerGroup.length == 0 && carddom.card.num == 1)
-        || (centerGroup.length > 0 &&centerGroup[centerGroup.length - 1].num == carddom.card.num - 1)) {
+        || (centerGroup.length > 0 && centerGroup[centerGroup.length - 1].num == carddom.card.num - 1)) {
         centerGroup.push(carddom.card);
+        gamestate.log.push(`${myPlayer.name} plays ${carddom.card.color} ${carddom.card.num}`);
     } else {
         gamestate.discards.push(carddom.card);
-        gamestate.lives --;
+        gamestate.lives--;
+        gamestate.log.push(`${myPlayer.name} erroneously plays ${carddom.card.color} ${carddom.card.num}`);
     }
     drawAndAdvanceTurn();
 }
 function discardCard() {
-    var carddom = curPlayer.cardDoms.filter(a => a.selected)[0];
+    var carddom = myPlayer.cardDoms.filter(a => a.selected)[0];
     if (!carddom) {
         return;
     }
-    curPlayer.cards.splice(carddom.card, 1);
+    myPlayer.cards.splice(carddom.card, 1);
     gamestate.discards.push(carddom.card);
+    gamestate.log.push(`${myPlayer.name} discards ${carddom.card.color} ${carddom.card.num}`);
     gamestate.time++;
 
     drawAndAdvanceTurn();
@@ -115,15 +142,33 @@ function discardCard() {
 function drawAndAdvanceTurn() {
     window.setTimeout(function () {
         var newCard = gamestate.deck.pop();
-        curPlayer.cards.push(newCard);
-        var newPlayerInd = gamestate.players.indexOf(gamestate.players.filter(p => p.name == curPlayer.name)[0]) + 1;
-        if (newPlayerInd == gamestate.players.length) {
-            newPlayerInd = 0;
-        }
-        curPlayer = clone(gamestate.players[newPlayerInd]);
-        drawGameState();
+        myPlayer.cards.push(newCard);
+        advanceTurn();
     }, 1000);
     drawGameState();
+}
+function advanceTurn() {
+    var newPlayerInd = gamestate.players.indexOf(gamestate.players.filter(p => p.name == gamestate.curPlayerName)[0]) + 1;
+    if (newPlayerInd == gamestate.players.length) {
+        newPlayerInd = 0;
+    }
+    //myPlayer = clone(gamestate.players[newPlayerInd]); //TODO delete
+    gamestate.curPlayerName = gamestate.players[newPlayerInd].name;
+
+    drawGameState();
+}
+function drawClueCards() {
+    var parent = get("modaltext");
+    clear(parent);
+
+    for (var i = 0; i < clueData.cards.length; i++) {
+        var card = clueData.cards[i];
+        makeCard(card, parent, 100 + i * 70, 50, true);
+    }
+    for (var i = 0; i < clueData.cards.length; i++) {
+        var card = clueData.cards[i];
+        makeCard(card, parent, 100 + i * 70, 200, false);
+    }
 }
 function makeCard(card, parent, left, top, visible) {
     var carddom = make("div", parent, "block card");
@@ -148,3 +193,52 @@ function makeCard(card, parent, left, top, visible) {
     }
     return carddom;
 }
+function clueColor(color) {
+    var playerInd = gamestate.players.indexOf(gamestate.players.filter(p => p.name == clueData.name)[0]);
+    clueData = deepClone(gamestate.players[playerInd]);
+    var matchingCards = clueData.cards.filter(c => c.color == color);
+    for (var card of matchingCards) {
+        card.clueColor = color;
+    }
+    myPlayer.cluedNumber = "";
+    myPlayer.cluedColor = color;
+    drawClueCards();
+}
+function clueNumber(number) {
+    var playerInd = gamestate.players.indexOf(gamestate.players.filter(p => p.name == clueData.name)[0]);
+    clueData = deepClone(gamestate.players[playerInd]);
+    var matchingCards = clueData.cards.filter(c => c.num == number);
+    for (var card of matchingCards) {
+        card.clueNumber = number;
+    }
+    myPlayer.cluedColor = "";
+    myPlayer.cluedNumber = number;
+    drawClueCards();
+}
+function sendClue() {
+    if (gamestate.time == 0) {
+        return;
+    }
+    gamestate.time--;
+    var playerInd = gamestate.players.indexOf(gamestate.players.filter(p => p.name == clueData.name)[0]);
+    gamestate.players[playerInd] = clueData;
+    get("myModal").style.display = "none";
+    gamestate.log.push(`${myPlayer.name} clues ${clueData.name} ${myPlayer.cluedColor}${myPlayer.cluedNumber}`);
+    advanceTurn();
+}
+window.setupModal = function (id) {
+    var modal = document.getElementById(id);
+    // Get the <span> element that closes the modal
+    var span = $(modal).find(".close")[0];
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function () {
+        modal.style.display = "none";
+    }
+    // When the user clicks anywhere outside of the modal, close it
+    document.addEventListener("click", function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    });
+}
+setupModal("myModal");

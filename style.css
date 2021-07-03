@@ -29,7 +29,13 @@
     bottom:3px;
     right:3px;
 }
-
+.playerName {
+    position: absolute;
+    right: 5;
+}
+.floatRight {
+    float: right;
+}
 /* The Modal (background) */
 .modal {
     display: none; /* Hidden by default */
@@ -57,6 +63,9 @@
     animation-name: animatetop;
     animation-duration: 0.4s;
     top: 100px;
+}
+#modaltext {
+    height:400px;
 }
 
 /* Add Animation */
