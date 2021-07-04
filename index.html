@@ -5,10 +5,14 @@
 </head>
 <body style="padding:0;margin:0">
     <div id="main">
+        <h1>Make New Game</h1>
         Name: <input id="newName" />
         <button class="btn btn-primary" onclick="addName()">Add</button>
         <button class="btn btn-primary" onclick="makeGameState()">Start Game</button>
         <br>
+        <h1>Join Existing Game</h1>
+        Name: <input id="myName" />
+        <button class="btn btn-primary" onclick="joinGame()">Join Game</button>
     </div>
     <div id="playerButtons">
         <button class="btn btn-primary" onclick="playCard(this)">Play</button>

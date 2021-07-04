@@ -18,6 +18,11 @@ function addName() {
     get("main").innerHTML += `${newName.value}<br>`;
     newName.value = "";
 }
+async function joinGame() {
+    myPlayer = {name:get("myName").value};
+    window.gamestate = await netService.getGameState();
+    drawGameState();
+}
 function makeGameState() {
     var numfreq = [3, 2, 2, 2, 1];
     var colorInd = ["red", "orange", "green", "blue", "purple"];
@@ -42,9 +47,9 @@ function makeGameState() {
 
     drawGameState();
 
-    window.setInterval(() => {
+    window.setInterval(async function() {
         if (gamestate.curPlayerName != myPlayer.name) {
-            window.gamestate = netService.getGameState();
+            window.gamestate = await netService.getGameState();
             drawGameState();
         }
     }, 2000);
@@ -154,6 +159,7 @@ function drawAndAdvanceTurn() {
         var newCard = gamestate.deck.pop();
         myPlayer.cards.push(newCard);
         advanceTurn();
+        netService.setGameState(gamestate);
     }, 1000);
     drawGameState();
 }
@@ -235,6 +241,7 @@ function sendClue() {
     get("myModal").style.display = "none";
     gamestate.log.push(`${myPlayer.name} clues ${clueData.name} ${myPlayer.cluedColor}${myPlayer.cluedNumber}`);
     advanceTurn();
+    netService.setGameState(gamestate);
 }
 window.setupModal = function (id) {
     var modal = document.getElementById(id);

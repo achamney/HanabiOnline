@@ -1,9 +1,45 @@
 window.netService = {
     getGameState: function () { },
-    setGameState: function (gs) { }
+    setGameState: function (gs, callback) { }
 }
 
-window.netService = new MockNetService();
+function JsonBoxyService() {
+    var MASTERURL = "https://jsonboxy.herokuapp.com/box_03a837fafb9b3a080800/";
+    var mainGame = "60e1101dae31770015131f92";
+    this.setGameState = function (gamestate, callback) {
+        $.ajax({
+            url: MASTERURL+mainGame,
+            type: "PUT",
+            data: JSON.stringify(gamestate),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data, textStatus, jqXHR) {
+                var uri = data["_id"];
+                console.log(uri);
+                if (callback)
+                    callback();
+            }
+        });
+    }
+    this.getGameState = async function() {
+        return await $.get(MASTERURL+mainGame);
+    }
+    this.makeNewGame = function() {
+        $.ajax({
+            url: MASTERURL,
+            type: "PUT",
+            data: JSON.stringify({}),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data, textStatus, jqXHR) {
+                var uri = data["_id"];
+                console.log(uri);
+            }
+        });
+    }
+}
+
+window.netService = new JsonBoxyService();
 
 function MockNetService() {
     this.getGameState = function () {
