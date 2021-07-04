@@ -10,6 +10,7 @@ var gamestate = {
     lives: 3
 }, myPlayer;
 window.onload = function () {
+
 }
 function addName() {
     var newName = get('newName');
@@ -27,7 +28,9 @@ function makeGameState() {
             }
         }
     }
-    gamestate.deck.sort((a, b) => { return Math.random() * 3 - 1; });
+    for (var i = 0; i < 10; i++) {
+        gamestate.deck.sort((a, b) => { return Math.random() * 3 - 1; });
+    }
     myPlayer = clone(gamestate.players[0]);
     gamestate.curPlayerName = myPlayer.name;
     for (var i = 0; i < 4; i++) {
@@ -38,6 +41,13 @@ function makeGameState() {
     }
 
     drawGameState();
+
+    window.setInterval(() => {
+        if (gamestate.curPlayerName != myPlayer.name) {
+            window.gamestate = netService.getGameState();
+            drawGameState();
+        }
+    }, 2000);
 }
 function drawGameState() {
     var main = get("main");
@@ -132,7 +142,7 @@ function discardCard() {
     if (!carddom) {
         return;
     }
-    myPlayer.cards.splice(carddom.card, 1);
+    myPlayer.cards.splice(myPlayer.cards.indexOf(carddom.card), 1);
     gamestate.discards.push(carddom.card);
     gamestate.log.push(`${myPlayer.name} discards ${carddom.card.color} ${carddom.card.num}`);
     gamestate.time++;
