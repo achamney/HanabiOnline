@@ -10,7 +10,16 @@ var gamestate = {
     lives: 3
 }, myPlayer;
 window.onload = function () {
-
+    $("#newName").keyup(function(event) {
+        if (event.keyCode === 13) {
+            $("#addButton").click();
+        }
+    });
+    $("#myName").keyup(function(event) {
+        if (event.keyCode === 13) {
+            $("#joinButton").click();
+        }
+    });
 }
 function addName() {
     var newName = get('newName');
@@ -19,8 +28,15 @@ function addName() {
     newName.value = "";
 }
 async function joinGame() {
-    myPlayer = {name:get("myName").value};
     window.gamestate = await netService.getGameState();
+    var myPlayerName = get("myName").value;
+    var fetchedPlayer = gamestate.players.filter(p => p.name == myPlayerName)[0];
+    if (!fetchedPlayer) {
+        alert("Cannot Find Player, Refresh and Try Again");
+        return;
+    }
+    myPlayer = clone(fetchedPlayer);
+
     drawGameState();
     watchGameState();
 }
@@ -51,7 +67,7 @@ function makeGameState() {
     watchGameState();
 }
 function watchGameState() {
-    window.setInterval(async function() {
+    window.setInterval(async function () {
         if (gamestate.curPlayerName != myPlayer.name) {
             window.gamestate = await netService.getGameState();
             drawGameState();
@@ -72,8 +88,9 @@ function drawGameState() {
     { x: "-100px", y: "200px", rot: "90deg" },
     { x: "250px", y: 0, rot: "180deg" },
     { x: "600px", y: "200px", rot: "270deg" }];
+    var startInd = gamestate.players.indexOf(gamestate.players.filter(p=>p.name==myPlayer.name)[0]);
     for (var i = 0; i < gamestate.players.length; i++) {
-        var player = gamestate.players[i];
+        var player = gamestate.players[startInd];
         var playerBoard = makesq("div", main, "block playerboard", 0, 0, "400px", "120px");
         if (player.name == gamestate.curPlayerName) {
             playerBoard.style["background-color"] = "#FFA";
@@ -91,6 +108,10 @@ function drawGameState() {
             } else {
                 pcarddom.onclick = clickTeamCard.bind(player);
             }
+        }
+        startInd ++;
+        if(startInd == gamestate.players.length) {
+            startInd = 0;
         }
     }
     var centerCount = 0;
@@ -132,7 +153,8 @@ function playCard() {
     if (!carddom) {
         return;
     }
-    myPlayer.cards.splice(myPlayer.cards.indexOf(carddom.card), 1);
+    var gsPlayer = gamestate.players.filter(p => p.name == myPlayer.name)[0];
+    gsPlayer.cards.splice(gsPlayer.cards.indexOf(carddom.card), 1);
     gamestate.center[carddom.card.color] = gamestate.center[carddom.card.color] || [];
     var centerGroup = gamestate.center[carddom.card.color];
     if ((centerGroup.length == 0 && carddom.card.num == 1)
@@ -151,7 +173,8 @@ function discardCard() {
     if (!carddom) {
         return;
     }
-    myPlayer.cards.splice(myPlayer.cards.indexOf(carddom.card), 1);
+    var gsPlayer = gamestate.players.filter(p => p.name == myPlayer.name)[0];
+    gsPlayer.cards.splice(gsPlayer.cards.indexOf(carddom.card), 1);
     gamestate.discards.push(carddom.card);
     gamestate.log.push(`${myPlayer.name} discards ${carddom.card.color} ${carddom.card.num}`);
     gamestate.time++;
@@ -161,7 +184,8 @@ function discardCard() {
 function drawAndAdvanceTurn() {
     window.setTimeout(function () {
         var newCard = gamestate.deck.pop();
-        myPlayer.cards.push(newCard);
+        var gsPlayer = gamestate.players.filter(p => p.name == myPlayer.name)[0];
+        gsPlayer.cards.push(newCard);
         advanceTurn();
         netService.setGameState(gamestate);
     }, 1000);
