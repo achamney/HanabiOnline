@@ -22,6 +22,7 @@ async function joinGame() {
     myPlayer = {name:get("myName").value};
     window.gamestate = await netService.getGameState();
     drawGameState();
+    watchGameState();
 }
 function makeGameState() {
     var numfreq = [3, 2, 2, 2, 1];
@@ -44,9 +45,12 @@ function makeGameState() {
             player.cards.push(card);
         }
     }
-
+    netService.setGameState(gamestate);
     drawGameState();
 
+    watchGameState();
+}
+function watchGameState() {
     window.setInterval(async function() {
         if (gamestate.curPlayerName != myPlayer.name) {
             window.gamestate = await netService.getGameState();
@@ -168,7 +172,6 @@ function advanceTurn() {
     if (newPlayerInd == gamestate.players.length) {
         newPlayerInd = 0;
     }
-    //myPlayer = clone(gamestate.players[newPlayerInd]); //TODO delete
     gamestate.curPlayerName = gamestate.players[newPlayerInd].name;
 
     drawGameState();
