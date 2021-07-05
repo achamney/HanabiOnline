@@ -10,12 +10,12 @@ var gamestate = {
     lives: 3
 }, myPlayer;
 window.onload = function () {
-    $("#newName").keyup(function(event) {
+    $("#newName").keyup(function (event) {
         if (event.keyCode === 13) {
             $("#addButton").click();
         }
     });
-    $("#myName").keyup(function(event) {
+    $("#myName").keyup(function (event) {
         if (event.keyCode === 13) {
             $("#joinButton").click();
         }
@@ -55,7 +55,8 @@ function makeGameState() {
     }
     myPlayer = clone(gamestate.players[0]);
     gamestate.curPlayerName = myPlayer.name;
-    for (var i = 0; i < 4; i++) {
+    var numCardsToDraw = gamestate.players.length < 4 ? 5 : 4;
+    for (var i = 0; i < numCardsToDraw; i++) {
         for (var player of gamestate.players) {
             var card = gamestate.deck.pop();
             player.cards.push(card);
@@ -88,7 +89,7 @@ function drawGameState() {
     { x: "-100px", y: "200px", rot: "90deg" },
     { x: "250px", y: 0, rot: "180deg" },
     { x: "600px", y: "200px", rot: "270deg" }];
-    var startInd = gamestate.players.indexOf(gamestate.players.filter(p=>p.name==myPlayer.name)[0]);
+    var startInd = gamestate.players.indexOf(gamestate.players.filter(p => p.name == myPlayer.name)[0]);
     for (var i = 0; i < gamestate.players.length; i++) {
         var player = gamestate.players[startInd];
         var playerBoard = makesq("div", main, "block playerboard", 0, 0, "400px", "120px");
@@ -109,8 +110,8 @@ function drawGameState() {
                 pcarddom.onclick = clickTeamCard.bind(player);
             }
         }
-        startInd ++;
-        if(startInd == gamestate.players.length) {
+        startInd++;
+        if (startInd == gamestate.players.length) {
             startInd = 0;
         }
     }
