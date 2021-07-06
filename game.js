@@ -80,7 +80,11 @@ function watchGameState() {
 function drawGameState() {
     var main = get("main");
     main.innerHTML = "";
-    make("span", main, "hud").innerHTML = `Time: ${gamestate.time} Lives: ${gamestate.lives}`;
+    var hudText = `Time: ${gamestate.time} Lives: ${gamestate.lives}`;
+    if (gamestate.finalTurns) {
+        hudText += ` Final Turns: ${gamestate.finalTurns}`
+    }
+    make("span", main, "hud").innerHTML = hudText;
     var center = makesq("div", main, "block centerboard", "160px", "120px", "590px", "340px");
     for (var i = 0; i < gamestate.deck.length; i++) {
         var card = gamestate.deck[i];
@@ -130,12 +134,13 @@ function drawGameState() {
 
     for (var i = 0; i < gamestate.discards.length; i++) {
         var card = gamestate.discards[i];
-        makeCard(card, main, 890, 150 + i * 25, true);
+        makeCard(card, main, 890, 90 + i * 27, true);
     }
-    var logBody = makesq("div", main, "block playerboard", "1100px", "100px", "150px", "440px");
+    var logBody = makesq("div", main, "block playerboard", "1000px", "100px", "250px", "440px");
     for (var log of gamestate.log) {
         logBody.innerHTML += `${log}<br>`;
     }
+    logBody.scrollTop = logBody.scrollHeight;
 }
 function clickPlayerCard() {
     for (var card of myPlayer.cardDoms) {
@@ -164,9 +169,15 @@ function playCard() {
         || (centerGroup.length > 0 && centerGroup[centerGroup.length - 1].num == carddom.card.num - 1)) {
         centerGroup.push(carddom.card);
         gamestate.log.push(`${myPlayer.name} plays ${carddom.card.color} ${carddom.card.num}`);
+        if (carddom.card.num == 5) {
+            gamestate.time++;
+        }
     } else {
         gamestate.discards.push(carddom.card);
         gamestate.lives--;
+        if (gamestate.lives == 0) {
+            endGame();
+        }
         gamestate.log.push(`${myPlayer.name} erroneously plays ${carddom.card.color} ${carddom.card.num}`);
     }
     drawAndAdvanceTurn();
@@ -176,19 +187,28 @@ function discardCard() {
     if (!carddom || myPlayer.name != gamestate.curPlayerName) {
         return;
     }
-    var gsPlayer = gamestate.players.filter(p => p.name == myPlayer.name)[0];
-    gsPlayer.cards.splice(gsPlayer.cards.indexOf(carddom.card), 1);
-    gamestate.discards.push(carddom.card);
-    gamestate.log.push(`${myPlayer.name} discards ${carddom.card.color} ${carddom.card.num}`);
+    discardThisCard(carddom.card);
+}
+function discardThisCard(card) {
+    var gsPlayer = gamestate.players.filter(p => p.name == gamestate.curPlayerName)[0];
+    gsPlayer.cards.splice(gsPlayer.cards.indexOf(card), 1);
+    gamestate.discards.push(card);
+    gamestate.discards.sort((a, b) => a.color > b.color ? 1 : -1);
+    gamestate.log.push(`${gsPlayer.name} discards ${card.color} ${card.num}`);
     gamestate.time++;
 
     drawAndAdvanceTurn();
 }
 function drawAndAdvanceTurn() {
     window.setTimeout(function () {
-        var newCard = gamestate.deck.pop();
-        var gsPlayer = gamestate.players.filter(p => p.name == myPlayer.name)[0];
-        gsPlayer.cards.push(newCard);
+        if (gamestate.deck.length == 1) {
+            gamestate.finalTurns = gamestate.players.length;
+        }
+        if (gamestate.deck.length > 0) {
+            var newCard = gamestate.deck.pop();
+            var gsPlayer = gamestate.players.filter(p => p.name == gamestate.curPlayerName)[0];
+            gsPlayer.cards.push(newCard);
+        }
         advanceTurn();
         netService.setGameState(gamestate);
     }, 1000);
@@ -200,8 +220,22 @@ function advanceTurn() {
         newPlayerInd = 0;
     }
     gamestate.curPlayerName = gamestate.players[newPlayerInd].name;
-
+    if (gamestate.finalTurns == 0) {
+        endGame();
+    }
+    if (gamestate.finalTurns) {
+        gamestate.finalTurns--;
+    }
+    
     drawGameState();
+}
+function endGame() {
+    get("endModal").style.display = "block";
+    var score = 0;
+    for (var key in gamestate.center) {
+        score += gamestate.center[key].length;
+    }
+    get("endmodaltext").innerHTML += score;
 }
 function drawClueCards() {
     var parent = get("modaltext");
@@ -210,7 +244,7 @@ function drawClueCards() {
     for (var i = 0; i < clueData.cards.length; i++) {
         var card = clueData.cards[i];
         var carddom = makeCard(card, parent, 100 + i * 70, 50, true);
-        carddom.onclick = function() {
+        carddom.onclick = function () {
             clueColor(this.color);
         }.bind(card);
     }
@@ -242,9 +276,12 @@ function makeCard(card, parent, left, top, visible) {
     }
     return carddom;
 }
-function clueColor(color) {
+function resetClueData() {
     var playerInd = gamestate.players.indexOf(gamestate.players.filter(p => p.name == clueData.name)[0]);
     clueData = deepClone(gamestate.players[playerInd]);
+}
+function clueColor(color) {
+    resetClueData();
     var matchingCards = clueData.cards.filter(c => c.color == color);
     for (var card of matchingCards) {
         card.clueColor = color;
@@ -254,8 +291,7 @@ function clueColor(color) {
     drawClueCards();
 }
 function clueNumber(number) {
-    var playerInd = gamestate.players.indexOf(gamestate.players.filter(p => p.name == clueData.name)[0]);
-    clueData = deepClone(gamestate.players[playerInd]);
+    resetClueData();
     var matchingCards = clueData.cards.filter(c => c.num == number);
     for (var card of matchingCards) {
         card.clueNumber = number;

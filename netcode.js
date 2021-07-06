@@ -39,7 +39,7 @@ function JsonBoxyService() {
     }
 }
 
-window.netService = new JsonBoxyService();
+window.netService = new MockNetService();/*JsonBoxyService();*/
 
 function MockNetService() {
     this.getGameState = function () {
@@ -70,18 +70,12 @@ function MockNetService() {
                     }
                 }
                 gamestate.time--;
+                advanceTurn();
             } else {
                 var discardCard = player.cards[0];
-                player.cards.splice(discardCard, 1);
-                gamestate.discards.push(discardCard);
-                gamestate.log.push(`${player.name} discards ${discardCard.color} ${discardCard.num}`);
-                
-                var newCard = gamestate.deck.pop();
-                player.cards.push(newCard);
-                gamestate.time++;
+                discardThisCard(discardCard);
             }
             
-            advanceTurn();
         }
         return gamestate;
     }

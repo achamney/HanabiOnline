@@ -9,14 +9,14 @@
     width: 60px;
     height: 100px;
     background-color: #EEE;
-    font-size:30px;
-    padding: 5px;
+    font-size:25px;
 }
 .centerboard {
     border: 1px solid black;
 }
 .playerboard {
     border: 1px solid black;
+    overflow: auto;
 }
 #playerButtons{
     position: relative;
@@ -65,6 +65,9 @@
     top: 100px;
 }
 #modaltext {
+    height:400px;
+}
+#endmodaltext {
     height:400px;
 }
 .btn.btn-purple {
