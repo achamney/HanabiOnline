@@ -2,7 +2,7 @@
     position: absolute;
 }
 
-.card {
+.playcard {
     border: 3px solid black;
     border-radius: 10px;
     transform-origin: center;
@@ -20,8 +20,8 @@
 }
 #playerButtons{
     position: relative;
-    top:510px;
-    left:540px
+    top:500px;
+    left:560px
 }
 .upnumber{
     transform: rotate(180deg);
@@ -52,7 +52,7 @@
 
 
 /* Modal Content */
-.modal-content {
+.modalContent {
     position: relative;
     background-color: #fefefe;
     margin: auto;
@@ -66,6 +66,11 @@
 }
 #modaltext {
     height:400px;
+}
+.btn.btn-purple {
+    color: white;
+    background-color: purple;
+    border-color: purple;
 }
 
 /* Add Animation */

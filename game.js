@@ -23,8 +23,10 @@ window.onload = function () {
 }
 function addName() {
     var newName = get('newName');
+    if (newName.value.length == 0)
+        return;
     gamestate.players.push({ cards: [], name: newName.value });
-    get("main").innerHTML += `${newName.value}<br>`;
+    get("nameHolder").innerHTML += `<li>${newName.value}</li>`;
     newName.value = "";
 }
 async function joinGame() {
@@ -101,7 +103,7 @@ function drawGameState() {
 
         for (var j = 0; j < player.cards.length; j++) {
             var pcard = player.cards[j];
-            var pcarddom = makeCard(pcard, playerBoard, j * 70, 0, player.name != myPlayer.name);
+            var pcarddom = makeCard(pcard, playerBoard, j * 60, 0, player.name != myPlayer.name);
             pcarddom.card = pcard;
             if (player.name == myPlayer.name) {
                 myPlayer.cardDoms.push(pcarddom);
@@ -151,7 +153,7 @@ function clickTeamCard() {
 }
 function playCard() {
     var carddom = myPlayer.cardDoms.filter(a => a.selected)[0];
-    if (!carddom) {
+    if (!carddom || myPlayer.name != gamestate.curPlayerName) {
         return;
     }
     var gsPlayer = gamestate.players.filter(p => p.name == myPlayer.name)[0];
@@ -171,7 +173,7 @@ function playCard() {
 }
 function discardCard() {
     var carddom = myPlayer.cardDoms.filter(a => a.selected)[0];
-    if (!carddom) {
+    if (!carddom || myPlayer.name != gamestate.curPlayerName) {
         return;
     }
     var gsPlayer = gamestate.players.filter(p => p.name == myPlayer.name)[0];
@@ -207,7 +209,10 @@ function drawClueCards() {
 
     for (var i = 0; i < clueData.cards.length; i++) {
         var card = clueData.cards[i];
-        makeCard(card, parent, 100 + i * 70, 50, true);
+        var carddom = makeCard(card, parent, 100 + i * 70, 50, true);
+        carddom.onclick = function() {
+            clueColor(this.color);
+        }.bind(card);
     }
     for (var i = 0; i < clueData.cards.length; i++) {
         var card = clueData.cards[i];
@@ -215,7 +220,7 @@ function drawClueCards() {
     }
 }
 function makeCard(card, parent, left, top, visible) {
-    var carddom = make("div", parent, "block card");
+    var carddom = make("div", parent, "block playcard");
     carddom.style.transform = `translate(${left}px,${top}px)`;
     if (visible) {
         carddom.style.border = "3px solid " + card.color;

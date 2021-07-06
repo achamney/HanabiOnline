@@ -1,46 +1,55 @@
 <html>
 <head>
     <link type="text/css" href="style.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <title>Hanabi</title>
 </head>
 <body style="padding:0;margin:0">
     <div id="main">
-        <h1>Make New Game</h1>
-        Name: <input id="newName" />
-        <button class="btn btn-primary" onclick="addName()" id="addButton">Add</button>
-        <button class="btn btn-primary" onclick="makeGameState()">Start Game</button>
-        <br>
-        <h1>Join Existing Game</h1>
-        Name: <input id="myName" />
-        <button class="btn btn-primary" onclick="joinGame()" id="joinButton">Join Game</button>
+        <div class="jumbotron">
+            <h1>Make New Game</h1>
+            Name: <input id="newName" />
+            <button class="btn btn-primary" onclick="addName()" id="addButton">Add</button>
+            <button class="btn btn-primary" onclick="makeGameState()">Start Game</button>
+            <ul id="nameHolder">
+
+            </ul>
+            <br>
+            <br>
+            <br>
+            <h1>Join Existing Game</h1>
+            Name: <input id="myName" />
+            <button class="btn btn-primary" onclick="joinGame()" id="joinButton">Join Game</button>
+        </div>
     </div>
     <div id="playerButtons">
-        <button class="btn btn-primary" onclick="playCard(this)">Play</button>
-        <button class="btn btn-primary" onclick="discardCard(this)">Discard</button>
+        <button class="btn btn-primary" onclick="playCard(this)">Play</button><br>
+        <button class="btn btn-secondary" onclick="discardCard(this)">Discard</button>
     </div>
     <!-- The Modal -->
     <div id="myModal" class="modal">
 
         <!-- Modal content -->
-        <div class="modal-content">
+        <div class="modalContent">
             <span class="close">&times;</span>
             <div id="modaltext">
 
             </div>
-            <button class="btn btn-default" onclick="clueColor('red')">Red</button>
-            <button class="btn btn-default" onclick="clueColor('orange')">Orange</button>
-            <button class="btn btn-default" onclick="clueColor('green')">Green</button>
-            <button class="btn btn-default" onclick="clueColor('blue')">Blue</button>
-            <button class="btn btn-default" onclick="clueColor('purple')">Purple</button>
+            <button class="btn btn-danger" onclick="clueColor('red')">Red</button>
+            <button class="btn btn-warning" onclick="clueColor('orange')">Orange</button>
+            <button class="btn btn-success" onclick="clueColor('green')">Green</button>
+            <button class="btn btn-primary" onclick="clueColor('blue')">Blue</button>
+            <button class="btn btn-purple" onclick="clueColor('purple')">Purple</button>
 
             <button class="btn btn-primary floatRight" onclick="sendClue()">Send Clue</button>
 
             <hr/>
-            <button class="btn btn-default" onclick="clueNumber(1)">1</button>
-            <button class="btn btn-default" onclick="clueNumber(2)">2</button>
-            <button class="btn btn-default" onclick="clueNumber(3)">3</button>
-            <button class="btn btn-default" onclick="clueNumber(4)">4</button>
-            <button class="btn btn-default" onclick="clueNumber(5)">5</button>
+            <button class="btn btn-secondary" onclick="clueNumber(1)">1</button>
+            <button class="btn btn-secondary" onclick="clueNumber(2)">2</button>
+            <button class="btn btn-secondary" onclick="clueNumber(3)">3</button>
+            <button class="btn btn-secondary" onclick="clueNumber(4)">4</button>
+            <button class="btn btn-secondary" onclick="clueNumber(5)">5</button>
         </div>
 
     </div>
@@ -48,6 +57,12 @@
 
 <script src="jquery-3.4.1.min.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
 <script src="markgen.js"></script>
 <script src="netcode.js"></script>
 <script src="game.js?v=2"></script>
