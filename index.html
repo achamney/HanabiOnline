@@ -1,8 +1,7 @@
 <html>
 <head>
-    <link type="text/css" href="style.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link type="text/css" href="style.css?ver=2" rel="stylesheet" />
+    <link rel="stylesheet" href="bootstrap.min.css" rel="stylesheet"/>
     <title>Hanabi</title>
 </head>
 <body style="padding:0;margin:0">
@@ -37,7 +36,7 @@
 
             </div>
             <button class="btn btn-danger" onclick="clueColor('red')">Red</button>
-            <button class="btn btn-warning" onclick="clueColor('orange')">Orange</button>
+            <button class="btn btn-warning" onclick="clueColor('yellow')">Yellow</button>
             <button class="btn btn-success" onclick="clueColor('green')">Green</button>
             <button class="btn btn-primary" onclick="clueColor('blue')">Blue</button>
             <button class="btn btn-purple" onclick="clueColor('purple')">Purple</button>
@@ -61,7 +60,7 @@
         <div class="modalContent">
             <div id="endmodaltext">
                 <h1>End Game</h1>
-                Final Score: 
+                Final Score:
             </div>
         </div>
 
@@ -70,13 +69,9 @@
 
 <script src="jquery-3.4.1.min.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-    crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-    crossorigin="anonymous"></script>
+<script src="popper.min.js"></script>
+<script src="bootstrap.min.js"></script>
 <script src="markgen.js"></script>
 <script src="netcode.js"></script>
-<script src="game.js?v=2"></script>
+<script src="game.js?v=5"></script>
 </html>

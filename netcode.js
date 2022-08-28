@@ -2,14 +2,16 @@ window.netService = {
     getGameState: function () { },
     setGameState: function (gs, callback) { }
 }
-
+window.setInterval(()=>{
+  //netService.getGameState();
+},5000);
 function JsonBoxyService() {
-    var MASTERURL = "https://jsonboxy.herokuapp.com/box_03a837fafb9b3a080800/";
-    var mainGame = "60e1101dae31770015131f92";
+    var MASTERURL = "http://192.168.21.202:5000/";
+    var mainGame = "";
     this.setGameState = function (gamestate, callback) {
         $.ajax({
-            url: MASTERURL+mainGame,
-            type: "PUT",
+            url: MASTERURL+"set",
+            type: "POST",
             data: JSON.stringify(gamestate),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
@@ -26,8 +28,8 @@ function JsonBoxyService() {
     }
     this.makeNewGame = function() {
         $.ajax({
-            url: MASTERURL,
-            type: "PUT",
+            url: MASTERURL+"set",
+            type: "POST",
             data: JSON.stringify({}),
             contentType: "application/json; charset=utf-8",
             dataType: "json",
@@ -39,7 +41,7 @@ function JsonBoxyService() {
     }
 }
 
-window.netService = new MockNetService();/*JsonBoxyService();*/
+window.netService = new JsonBoxyService();
 
 function MockNetService() {
     this.getGameState = function () {
@@ -75,7 +77,7 @@ function MockNetService() {
                 var discardCard = player.cards[0];
                 discardThisCard(discardCard);
             }
-            
+
         }
         return gamestate;
     }

@@ -9,6 +9,7 @@ var gamestate = {
     time: 8,
     lives: 3
 }, myPlayer;
+var colorInd = ["red", "yellow", "green", "blue", "purple"];
 window.onload = function () {
     $("#newName").keyup(function (event) {
         if (event.keyCode === 13) {
@@ -31,6 +32,7 @@ function addName() {
 }
 async function joinGame() {
     window.gamestate = await netService.getGameState();
+    window.gamestate = JSON.parse(window.gamestate);
     var myPlayerName = get("myName").value;
     var fetchedPlayer = gamestate.players.filter(p => p.name == myPlayerName)[0];
     if (!fetchedPlayer) {
@@ -39,12 +41,11 @@ async function joinGame() {
     }
     myPlayer = clone(fetchedPlayer);
 
-    drawGameState();
     watchGameState();
+    drawGameState();
 }
 function makeGameState() {
     var numfreq = [3, 2, 2, 2, 1];
-    var colorInd = ["red", "orange", "green", "blue", "purple"];
     for (var i = 0; i < 5; i++) {
         for (var j = 0; j < 5; j++) {
             for (var k = 0; k < numfreq[i]; k++) {
@@ -73,12 +74,14 @@ function watchGameState() {
     window.setInterval(async function () {
         if (gamestate.curPlayerName != myPlayer.name) {
             window.gamestate = await netService.getGameState();
+            window.gamestate = JSON.parse(window.gamestate);
             drawGameState();
         }
     }, 2000);
 }
 function drawGameState() {
     var main = get("main");
+    get("playerButtons").style['display']= gamestate.curPlayerName==myPlayer.name ?"block":"none";
     main.innerHTML = "";
     var hudText = `Time: ${gamestate.time} Lives: ${gamestate.lives}`;
     if (gamestate.finalTurns) {
@@ -93,7 +96,7 @@ function drawGameState() {
     myPlayer.cardDoms = [];
     var translatePos = [{ x: "250px", y: "500px", rot: 0 },
     { x: "-100px", y: "200px", rot: "90deg" },
-    { x: "250px", y: 0, rot: "180deg" },
+    { x: "250px", y: 0, rot: "0" },
     { x: "600px", y: "200px", rot: "270deg" }];
     var startInd = gamestate.players.indexOf(gamestate.players.filter(p => p.name == myPlayer.name)[0]);
     for (var i = 0; i < gamestate.players.length; i++) {
@@ -107,7 +110,7 @@ function drawGameState() {
 
         for (var j = 0; j < player.cards.length; j++) {
             var pcard = player.cards[j];
-            var pcarddom = makeCard(pcard, playerBoard, j * 60, 0, player.name != myPlayer.name);
+            var pcarddom = makeCard(pcard, playerBoard,(56*player.cards.length)- ((j+1) * 56), 0, player.name != myPlayer.name);
             pcarddom.card = pcard;
             if (player.name == myPlayer.name) {
                 myPlayer.cardDoms.push(pcarddom);
@@ -134,10 +137,15 @@ function drawGameState() {
 
     for (var i = 0; i < gamestate.discards.length; i++) {
         var card = gamestate.discards[i];
-        makeCard(card, main, 890, 90 + i * 27, true);
+        makeCard(card, main, 890, 90 + i * 33, true, true);
     }
-    var logBody = makesq("div", main, "block playerboard", "1000px", "100px", "250px", "440px");
+    var logBody = makesq("div", main, "block playerboard logbody", "1000px", "100px", "250px", "440px");
     for (var log of gamestate.log) {
+        var lColor = colorInd.filter(c=>~log.indexOf(c))[0];
+        if(lColor) {
+          var parts = log.split(lColor);
+          log = `${parts[0]}<span class="${lColor}">${lColor}</span>${parts[1]}`;
+        }
         logBody.innerHTML += `${log}<br>`;
     }
     logBody.scrollTop = logBody.scrollHeight;
@@ -226,7 +234,7 @@ function advanceTurn() {
     if (gamestate.finalTurns) {
         gamestate.finalTurns--;
     }
-    
+
     drawGameState();
 }
 function endGame() {
@@ -240,31 +248,37 @@ function endGame() {
 function drawClueCards() {
     var parent = get("modaltext");
     clear(parent);
-
+    var xFunc = (ind)=>clueData.cards.length*56 - ((ind+1)*56) + 100;
     for (var i = 0; i < clueData.cards.length; i++) {
         var card = clueData.cards[i];
-        var carddom = makeCard(card, parent, 100 + i * 70, 50, true);
+        var carddom = makeCard(card, parent, xFunc(i), 50, true);
         carddom.onclick = function () {
             clueColor(this.color);
         }.bind(card);
     }
     for (var i = 0; i < clueData.cards.length; i++) {
         var card = clueData.cards[i];
-        makeCard(card, parent, 100 + i * 70, 200, false);
+        makeCard(card, parent, xFunc(i), 200, false);
     }
 }
-function makeCard(card, parent, left, top, visible) {
+function makeCard(card, parent, left, top, visible, dontDoCritical) {
     var carddom = make("div", parent, "block playcard");
     carddom.style.transform = `translate(${left}px,${top}px)`;
     if (visible) {
         carddom.style.border = "3px solid " + card.color;
         carddom.style.color = card.color;
-
-        carddom.innerHTML = card.num;
+        var otherCards = gamestate.deck,
+            critical="";
+        gamestate.players.forEach(p=>otherCards=otherCards.concat(p.cards));
+        if(!dontDoCritical &&  gamestate.center[card.color] && gamestate.center[card.color].length <card.num &&
+          otherCards.filter(c=>c.num==card.num && c.color==card.color).length == 1) {
+          critical = " *";
+        }
+        carddom.innerHTML = card.num+critical;
         var upNum = make("div", carddom, "upnumber");
         upNum.innerHTML = card.num;
     } else {
-        var col = card.clueColor ? card.clueColor : "black";
+        var col = card.clueColor ? card.clueColor : "#999";
         carddom.style.color = col;
         carddom.style.border = "3px solid " + col;
         if (card.clueNumber) {
