@@ -9,6 +9,7 @@ var gamestate = {
     time: 8,
     lives: 3
 }, myPlayer;
+var prevCardPositions = {};
 var colorInd = ["red", "yellow", "green", "blue", "purple"];
 window.onload = function () {
     $("#newName").keyup(function (event) {
@@ -21,6 +22,11 @@ window.onload = function () {
             $("#joinButton").click();
         }
     });
+    var playerName = getUrlParams();
+    if (playerName) {
+      $("#myName").val(playerName);
+      $("#joinButton").click();
+    }
 }
 function addName() {
     var newName = get('newName');
@@ -49,7 +55,7 @@ function makeGameState() {
     for (var i = 0; i < 5; i++) {
         for (var j = 0; j < 5; j++) {
             for (var k = 0; k < numfreq[i]; k++) {
-                gamestate.deck.push({ num: i + 1, color: colorInd[j] });
+                gamestate.deck.push({ num: i + 1, color: colorInd[j], uid: k });
             }
         }
     }
@@ -91,26 +97,29 @@ function drawGameState() {
     var center = makesq("div", main, "block centerboard", "160px", "120px", "590px", "340px");
     for (var i = 0; i < gamestate.deck.length; i++) {
         var card = gamestate.deck[i];
-        makeCard(card, center, i * 0.5 + 450, (i * -1) + 120, false);
+        makeCard(card, center, i * 0.5 + 450, (i * -1) + 120, false, false, true); // isVisible, drawCritical, savePositions
     }
     myPlayer.cardDoms = [];
-    var translatePos = [{ x: "250px", y: "500px", rot: 0 },
-    { x: "-100px", y: "200px", rot: "90deg" },
-    { x: "250px", y: 0, rot: "0" },
-    { x: "600px", y: "200px", rot: "270deg" }];
+    var translatePos = [{ x: "250px", y: "500px", rot: 0, cx:250, cy:500,xm:1,ym:0 },
+    { x: "-150px", y: "200px", rot: "90deg", cx:20, cy:50,xm:0,ym:1 },
+    { x: "250px", y: 0, rot: "0", cx:250, cy:0,xm:1,ym:0 },
+    { x: "600px", y: "200px", rot: "90deg", cx:800, cy:0,xm:0,ym:1 }];
     var startInd = gamestate.players.indexOf(gamestate.players.filter(p => p.name == myPlayer.name)[0]);
     for (var i = 0; i < gamestate.players.length; i++) {
         var player = gamestate.players[startInd];
         var playerBoard = makesq("div", main, "block playerboard", 0, 0, "400px", "120px");
+        var transPos = translatePos[i];
         if (player.name == gamestate.curPlayerName) {
             playerBoard.style["background-color"] = "#FFA";
         }
         make("span", playerBoard, "playerName").innerHTML = player.name;
-        playerBoard.style.transform = `translate(${translatePos[i].x},${translatePos[i].y}) rotate(${translatePos[i].rot})`
+        playerBoard.style.transform = `translate(${transPos.x},${transPos.y}) rotate(${transPos.rot})`
 
         for (var j = 0; j < player.cards.length; j++) {
             var pcard = player.cards[j];
-            var pcarddom = makeCard(pcard, playerBoard,(56*player.cards.length)- ((j+1) * 56), 0, player.name != myPlayer.name);
+            var pcarddom = makeCard(pcard, main,transPos.cx+j*30*transPos.xm, transPos.cy+j*30*transPos.ym,
+                  player.name != myPlayer.name, false, true);  // isVisible, dontdrawCritical, savePositions
+            pcarddom.style.transform = `rotate(${transPos.rot})`;
             pcarddom.card = pcard;
             if (player.name == myPlayer.name) {
                 myPlayer.cardDoms.push(pcarddom);
@@ -130,14 +139,14 @@ function drawGameState() {
 
         for (var j = 0; j < centerGroup.length; j++) {
             var card = centerGroup[j];
-            makeCard(card, main, j * 2 + 80 * centerCount + 200, 250, true);
+            makeCard(card, main, j * 2 + 80 * centerCount + 200, 250, true, false, true);// isVisible, dontdrawCritical, savePositions
         }
         centerCount++;
     }
 
     for (var i = 0; i < gamestate.discards.length; i++) {
         var card = gamestate.discards[i];
-        makeCard(card, main, 890, 90 + i * 33, true, true);
+        makeCard(card, main, 890, 90 + i * 33, true, true, true);// isVisible, dontdrawCritical, savePositions
     }
     var logBody = makesq("div", main, "block playerboard logbody", "1000px", "100px", "250px", "440px");
     for (var log of gamestate.log) {
@@ -149,6 +158,12 @@ function drawGameState() {
         logBody.innerHTML += `${log}<br>`;
     }
     logBody.scrollTop = logBody.scrollHeight;
+}
+function getUrlParams() {
+  var params = window.location.search.split("=");
+  if (params.length >=1) {
+    return params[1];
+  }
 }
 function clickPlayerCard() {
     for (var card of myPlayer.cardDoms) {
@@ -261,9 +276,26 @@ function drawClueCards() {
         makeCard(card, parent, xFunc(i), 200, false);
     }
 }
-function makeCard(card, parent, left, top, visible, dontDoCritical) {
+function makeCard(card, parent, left, top, visible, dontDoCritical, savePositions) {
     var carddom = make("div", parent, "block playcard");
-    carddom.style.transform = `translate(${left}px,${top}px)`;
+    carddom.id=card.color+""+card.num+""+card.uid;
+    if (prevCardPositions[carddom.id]) {
+      carddom.style.left = `${prevCardPositions[carddom.id].left}px`;
+      carddom.style.top = `${prevCardPositions[carddom.id].top}px`;
+    }
+    else {
+      carddom.style.left = `0px`;
+      carddom.style.top = `0px`;
+    }
+    window.setTimeout(()=>{
+      carddom.style.left = `${left}px`;
+      carddom.style.top = `${top}px`;
+      if(savePositions) {
+        prevCardPositions[carddom.id] = {};
+        prevCardPositions[carddom.id].left = left;
+        prevCardPositions[carddom.id].top = top;
+      }
+    },1);
     if (visible) {
         carddom.style.border = "3px solid " + card.color;
         carddom.style.color = card.color;
