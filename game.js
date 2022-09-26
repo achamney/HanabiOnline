@@ -7,7 +7,8 @@ var gamestate = {
     log: [],
     curPlayerName: "",
     time: 8,
-    lives: 3
+    lives: 3,
+    _id: "hanabidata"
 }, myPlayer;
 var prevCardPositions = {};
 var colorInd = ["red", "yellow", "green", "blue", "purple"];

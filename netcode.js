@@ -7,10 +7,10 @@ window.setInterval(()=>{
 },5000);
 function JsonBoxyService() {
     var MASTERURL = location.protocol+"//achamney.pythonanywhere.com/";
-    var mainGame = "";
+    var mainGame = "hanabidata";
     this.setGameState = function (gamestate, callback) {
         $.ajax({
-            url: MASTERURL+"set",
+            url: MASTERURL+"set/"+mainGame,
             type: "POST",
             data: JSON.stringify(gamestate),
             contentType: "application/json; charset=utf-8",
@@ -26,18 +26,20 @@ function JsonBoxyService() {
     this.getGameState = async function() {
         return await $.get(MASTERURL+mainGame);
     }
-    this.makeNewGame = function() {
-        $.ajax({
-            url: MASTERURL+"set",
-            type: "POST",
-            data: JSON.stringify({}),
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function (data, textStatus, jqXHR) {
-                var uri = data["_id"];
-                console.log(uri);
-            }
-        });
+    this.makeNewGame = async function() {
+        try {
+          var data = await $.ajax({
+              url: MASTERURL+"make",
+              type: "POST",
+              contentType: "application/json; charset=utf-8",
+              dataType: "json",
+              success: function (data, textStatus, jqXHR) {
+              }
+          });
+        } catch (e) {
+          console.log(e);
+        }
+        return data;
     }
 }
 
